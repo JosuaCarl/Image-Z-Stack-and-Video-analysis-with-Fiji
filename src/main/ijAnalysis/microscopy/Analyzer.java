@@ -6,10 +6,7 @@ import ij.gui.Roi;
 import ij.gui.WaitForUserDialog;
 import ij.plugin.*;
 import ij.plugin.filter.AVI_Writer;
-import ij.plugin.filter.RGBStackSplitter;
 import ij.plugin.frame.ContrastAdjuster;
-import ij.process.ColorSpaceConverter;
-import ij.process.ImageConverter;
 
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -44,7 +41,7 @@ public class Analyzer implements PlugIn {
         // function to scan folders/subfolders/files to find files with correct suffix
         try (Stream<Path> entries = Files.list(inFolder)) {
             for(Path entry : entries.toList()) {
-                IJ.log("Checking " + entry.toString());
+                IJ.log("Checking out folder: " + entry.toString());
                 if( Files.isDirectory(entry) && !entry.equals(outFolder)) {
                     Path newOutFolder = outFolder.resolve(entry.getFileName());
                     try {
@@ -101,7 +98,7 @@ public class Analyzer implements PlugIn {
 
         String[] imageTitles = WindowManager.getImageTitles();
         for(String title : imageTitles) {
-            image = WindowManager.getImage(title);
+            image  = WindowManager.getImage(title);
             image.changes = false;
             image.close();
         }
@@ -125,8 +122,6 @@ public class Analyzer implements PlugIn {
 
         for (int i = 0; i < rgbs.length; i++) {
             ImagePlus rgbImage = rgbs[i];
-            setCurrentImage(rgbImage);
-
             save_tif(rgbImage, outFolder, colorNamesImage[i]);
 
             ImagePlus greyImage = toGrey(rgbImage);
@@ -173,8 +168,8 @@ public class Analyzer implements PlugIn {
         if (projectionType.equals("Select Z-level")) {
             image = adjustBrightnessContrast(image);
             image = cropImage(image);
-            image = addScaleBar(image);
             image = makeSubstack(image);
+            image = addScaleBar(image);
 
             imageAnalysis(image, outFolder, false);
         }
@@ -336,6 +331,9 @@ public class Analyzer implements PlugIn {
         RGBStackMerge rgbStackMerge = new RGBStackMerge();
         ImagePlus composite = rgbStackMerge.mergeHyperstacks(rgb, true);
 
+        IJ.log("Showing composite: " + composite.getTitle());
+        composite.show();
+
         return addScaleBar(composite);
     }
 
@@ -345,6 +343,7 @@ public class Analyzer implements PlugIn {
 
         SubstackMaker substackMaker = new SubstackMaker();
         substackMaker.run("");
+        IJ.log("Substack created");
 
         return IJ.getImage();
     }
