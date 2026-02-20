@@ -21,16 +21,16 @@ function processFolder(inpath, outpath, previous_path) {
 	list = getFileList(inpath);
 	list = Array.sort(list);
 	for (i = 0; i < list.length; i++) {
-		
+
 		if(File.isDirectory(inpath + File.separator + list[i]))
 
 			// Create Directory branches in target output directory
 			if(! File.isDirectory(outpath + previous_path + File.separator + list[i]) ){
 				File.makeDirectory(outpath + previous_path + File.separator + list[i]);
 			}
-			
+
 			processFolder(inpath + File.separator + list[i], outpath, previous_path + File.separator + list[i]);
-		
+
 		if(endsWith(list[i], suffix))
 			processFile(previous_path, inpath, outputDirectory, list[i]);
 	}
@@ -39,7 +39,7 @@ function processFolder(inpath, outpath, previous_path) {
 function processFile(previous_path, input, output, file) {
 	filepath = input + File.separator + file;
 	outpath = output + previous_path;
-	
+
 	// Import
 	print("Processing: " + filepath);
 	run("Bio-Formats Importer", "open=["+ filepath + "] color_mode=Default view=Hyperstack stack_order=XYCZT");
@@ -52,13 +52,13 @@ function processFile(previous_path, input, output, file) {
 		video_analysis(previous_path, input, output, file, filepath, outpath, channels);
 	}
 	else {
-		z_stack_analysis(previous_path, input, output, file, filepath, outpath, channels);	
+		z_stack_analysis(previous_path, input, output, file, filepath, outpath, channels);
 	}
 }
 
 
 
-	
+
 
 // 			ANALYSIS PIPELINE FUNCTIONS 			//
 
@@ -76,17 +76,17 @@ function image_analysis(previous_path, input, output, file, filepath, outpath, c
 	// Save merge
 	merge_composition(merges);
 	save_tiff("Composite", outpath, "Merge");
-	
+
 	// Save single files
 	color_names = newArray("RR", "AF", "DAPI", "Ph2");
 	for (i = 0; i < merges.length; i++) {
 		save_tiff(merges[i], outpath, color_names[i]);
-		selectImage(merges[i]);	
+		selectImage(merges[i]);
 		run("RGB Color");
 		run("Grays");
 		save_tiff(merges[i], outpath, color_names[i] + "_gray");
 	}
-	
+
 	close("*");
 }
 
@@ -95,7 +95,7 @@ function image_analysis(previous_path, input, output, file, filepath, outpath, c
 function video_analysis(previous_path, input, output, file, filepath, outpath, channels) {
 	// function for video analysis
 	merges = common_analysis_steps(channels);
-	
+
 	Dialog.create("Saving options");
 	Dialog.addString("Frames per second:", 1);
 	Dialog.show();
@@ -104,7 +104,7 @@ function video_analysis(previous_path, input, output, file, filepath, outpath, c
 	// Save merge
 	merge_composition(merges);
 	save_avi("Composite", outpath, "Merge", frames);
-	
+
 	// Save single files
 	color_names = newArray("TMR", "GFP", "Hoechst", "Ph2");
 	for (i = 0; i < merges.length; i++) {
@@ -137,7 +137,7 @@ function z_stack_analysis(previous_path, input, output, file, filepath, outpath,
 
 		for (i = 0; i < merges.length; i++) {
 			selectWindow(merges[i]);
-			
+
 			if (projection_type == "Z Project") {
 				run("Z Project...", "projection=[Max Intensity]");
 				merges[i] = "MAX_"+ merges[i];
@@ -145,10 +145,10 @@ function z_stack_analysis(previous_path, input, output, file, filepath, outpath,
 			else if (projection_type == "3D Project") {
 				run("3D Project...", "projection=[Brightest Point] axis=Y-Axis slice=0.20 initial=0 total=360 rotation=10 lower=1 upper=255 opacity=0 surface=100 interior=50 interpolate");
 				merges[i] = "Projections of "+ merges[i];
-			}		
+			}
 		}
 
-		
+
 		// Save merge
 		merge_composition(merges);
 		if (projection_type == "Z Project") {
@@ -159,10 +159,10 @@ function z_stack_analysis(previous_path, input, output, file, filepath, outpath,
 			Dialog.addString("Frames per second:", 5);
 			Dialog.show();
 			frames = Dialog.getString();
-			
+
 			save_avi("Composite", outpath, "Merge", frames);
 		}
-		
+
 		// Save single channels
 		color_names = newArray("TMR", "GFP", "Hoechst", "Ph2");
 		for (i = 0; i < merges.length; i++) {
@@ -171,9 +171,9 @@ function z_stack_analysis(previous_path, input, output, file, filepath, outpath,
 			}
 			else if (projection_type == "3D Project") {
 				save_avi(merges[i], outpath, color_names[i], frames);
-			}	
-		}	
-	}	
+			}
+		}
+	}
 
 	close("*");
 }
@@ -229,14 +229,14 @@ function split_channels() {
 }
 
 
-function separate_by_color(num_channels, file) { 
+function separate_by_color(num_channels, file) {
 	// Separate channels by color
 	merges = newArray(num_channels);
 	for (i = 1; i <= num_channels; i++) {
-		
+
 		channel_file = "C"+ i + "-" + file;
 		selectImage(channel_file);
-		
+
 		run("RGB Color");
 		run("Color Histogram");
 		means = Table.getColumn("mean", "Results"); 	// means[0] = red, means[1] = green, means[2] = blue
@@ -245,24 +245,24 @@ function separate_by_color(num_channels, file) {
 
 		if (means[0] < means[2] && means[1] < means[2]) {					// separate the images into right chanels
 			merges[2] = channel_file;
-		} 
+		}
 		else if (means[0] < means[1] && means[2] < means[1]) {
 			merges[1] = channel_file;
-		}	
+		}
 		else if (means[1] < means[0] && means[2] < means[0]) {
 			merges[0] = channel_file;
 		}
 		else {
 			merges[3] = channel_file;
 		}
-	}	
+	}
 	return merges;
 }
-	
 
-function merge_composition(merges) { 
+
+function merge_composition(merges) {
 	// Merge Channels
-	run("Merge Channels...", "c1=["+ merges[0] +"] c2=["+ merges[1] +"] c3=["+ merges[2] +"] create keep");	
+	run("Merge Channels...", "c1=["+ merges[0] +"] c2=["+ merges[1] +"] c3=["+ merges[2] +"] create keep");
 	selectWindow("Composite");
 	run("Scale Bar...", "width=10 height=5 thickness=5 font=0 bold overlay");
 }
@@ -276,7 +276,7 @@ function save_tiff(id, outpath, suffix) {
 	close();
 }
 
-function save_avi(id, outpath, suffix, frames) { 
+function save_avi(id, outpath, suffix, frames) {
 	selectImage(id);
 	run("AVI... ", "compression=JPEG frame="+ frames + " save="+ outpath + File.separator + file + "_" + suffix + ".avi");
 }

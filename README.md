@@ -2,10 +2,12 @@
 
 A script that navigates through folders and subfolders of a starting point, miming the folder structure at a given output path, and opening all files with a defined suffix for further analysis. The analysis separates microscopy input into separate channels, merges and saves them with a naming scheme that can be adjusted in the code. The script detects automatically, whether the given file is a image, z-stack or video and will adjust analysis accordingly. Just try it out on your microscopy images and see the magic happen.
 
-## Naviagtion
-The main scripts are found in [src/main/ijAnalysis.microscopy](src/main/ijAnalysis.microscopy) and [src/resources/ijAnalysis.microscopy](src/resources/ijAnalysis.microscopy).
-- Analyzer.java
-- Analyzer.ijm
+## Navigation
+The Fiji executable macros are found in [macros](macros/). They incorporate all complete versions of the image analysis macros in different iterations.
+- Analyzer-v1.ijm
+- Analyzer-v2.java
+
+In addition, [src/main/ijAnalysis.microscopy](src/main/ijAnalysis.microscopy) contains the Analyzer as a testable java project, installable via Gradle (`gradlew install`).
 
 ## Installation
 Just download the `.ijm` / `.java` files or clone the repository with a method to your liking.

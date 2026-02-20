@@ -1,5 +1,3 @@
-package ijAnalysis.microscopy;
-
 import ij.*;
 import ij.gui.GenericDialog;
 import ij.gui.Roi;
