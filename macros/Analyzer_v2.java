@@ -16,7 +16,7 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 
 
-public class Analyzer implements PlugIn {
+public class Analyzer_v2 implements PlugIn {
     Path inputDirectory;
     Path outputDirectory;
     String fileSuffix;
