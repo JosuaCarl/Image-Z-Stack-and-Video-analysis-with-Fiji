@@ -29,14 +29,18 @@ jobs:
           java-version: '8'
           distribution: 'temurin'
           cache: maven
+
       - name: Build with Maven
         run: mvn -B package --no-transfer-progress
+
       - run: mkdir staging && cp target/*[!-sources].jar staging
+
       - uses: actions/upload-artifact@v4
         with:
           tag_name: v${{ steps.get_version.outputs.version }}
           name: Release v${{ steps.get_version.outputs.version }}
           path: staging
+
       - name: Create GitHub Release
         uses: actions/create-release@v1
         with:
@@ -45,5 +49,17 @@ jobs:
           body: |
             Release version ${{ steps.get_version.outputs.version }}
           files: target/*[!-sources].jar
+          draft: false
+          prerelease: false
         env:
           GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Upload JAR
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}  # passed from previous step
+          asset_path: target/Wagner_Analyzers-${{ steps.get_version.outputs.version }}.jar
+          asset_name: Wagner_Analyzers-${{ steps.get_version.outputs.version }}.jar
+          asset_content_type: application/java-archive
