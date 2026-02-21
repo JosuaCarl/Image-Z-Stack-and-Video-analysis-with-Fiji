@@ -13,12 +13,14 @@ import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class Wagner_Analyzer implements PlugIn {
+public class Stepwise_Analyzer implements PlugIn {
     public void run(String arg) {
-        Path inputDirectory = Path.of( IJ.getDirectory("Choose input directory") ).normalize().toAbsolutePath();
-        Path outputDirectory = Path.of( IJ.getDirectory("Choose output directory") ).normalize().toAbsolutePath();
+        Path inputDirectory = Paths.get( IJ.getDirectory("Choose input directory") ).normalize().toAbsolutePath();
+        Path outputDirectory = Paths.get( IJ.getDirectory("Choose output directory") ).normalize().toAbsolutePath();
         String fileSuffix = IJ.getString("File suffix", ".nd2");
 
         processFolder(inputDirectory, outputDirectory, fileSuffix);
@@ -33,7 +35,7 @@ public class Wagner_Analyzer implements PlugIn {
     public void processFolder(Path inFolder, Path outFolder, String fileSuffix) {
         // function to scan folders/subfolders/files to find files with correct suffix
         try (Stream<Path> entries = Files.list(inFolder)) {
-            for(Path entry : entries.toList()) {
+            for(Path entry : entries.collect(Collectors.toList())) {
                 IJ.log("Checking out folder: " + entry.toString());
                 if( Files.isDirectory(entry) && !entry.equals(outFolder)) {
                     Path newOutFolder = outFolder.resolve(entry.getFileName());
@@ -289,7 +291,7 @@ public class Wagner_Analyzer implements PlugIn {
     }
 
     public ImagePlus toRGB(ImagePlus image) {
-        if (!image.isRGB()) {
+        if (!image.isComposite()) {
             IJ.log("Converting image to RGB...");
             RGBStackConverter.convertToRGB(image);
         }

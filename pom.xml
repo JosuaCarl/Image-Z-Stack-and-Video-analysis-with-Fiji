@@ -10,16 +10,22 @@
     </parent>
 
     <groupId>sc.fiji</groupId>
-    <artifactId>Wagner_Analyzer</artifactId>
+    <artifactId>Wagner_Analyzers</artifactId>
     <version>1.0.0</version>
 
-    <name>Wagner_Analyzer</name>
-    <description>A java Analyzer for the Wagner Group.</description>
+    <name>Wagner_Analyzers</name>
+    <description>Analyzers for the Wagner Group.</description>
     <inceptionYear>2026</inceptionYear>
+
+    <url>https://github.com/JosuaCarl/Image-Z-Stack-and-Video-analysis-with-Fiji/tree/main</url>
+    <organization>
+        <name>Josua Carl</name>
+    </organization>
+
     <licenses>
         <license>
-            <name>GNU General Public License v3+</name>
-            <url>https://www.gnu.org/licenses/gpl.html</url>
+            <name>The 3-Clause BSD License</name>
+            <url>https://opensource.org/license/BSD-3-clause</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -34,6 +40,21 @@
             </roles>
         </developer>
     </developers>
+
+    <contributors>
+        <contributor>
+            <name>Josua Carl</name>
+            <url>https://github.com/JosuaCarl</url>
+            <properties><id>JosuaCarl</id></properties>
+        </contributor>
+    </contributors>
+
+    <mailingLists>
+        <mailingList>
+            <name>Github Issues</name>
+            <archive>https://github.com/JosuaCarl/Image-Z-Stack-and-Video-analysis-with-Fiji/issues</archive>
+        </mailingList>
+    </mailingLists>
 
     <scm>
         <connection>scm:git:https://github.com/JosuaCarl/Image-Z-Stack-and-Video-analysis-with-Fiji</connection>
@@ -57,6 +78,11 @@
         </repository>
     </repositories>
 
+    <properties>
+        <license.licenseName>BSD-3-Clause </license.licenseName>
+        <license.copyrightOwners>Josua Carl</license.copyrightOwners>
+    </properties>
+
     <dependencies>
         <!-- ImageJ dependencies -->
         <dependency>
@@ -64,4 +90,15 @@
             <artifactId>ij</artifactId>
         </dependency>
     </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/resources</directory>
+                    <includes>
+                        <include>plugins.config</include>
+                    </includes>
+            </resource>
+        </resources>
+    </build>
 </project>
