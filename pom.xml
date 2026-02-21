@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.scijava</groupId>
+        <artifactId>pom-scijava</artifactId>
+        <version>26.0.0</version>
+        <relativePath />
+    </parent>
+
+    <groupId>sc.fiji</groupId>
+    <artifactId>Wagner_Analyzer</artifactId>
+    <version>1.0.0</version>
+
+    <name>Wagner_Analyzer</name>
+    <description>A java Analyzer for the Wagner Group.</description>
+    <inceptionYear>2026</inceptionYear>
+    <licenses>
+        <license>
+            <name>GNU General Public License v3+</name>
+            <url>https://www.gnu.org/licenses/gpl.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>JosuaCarl</id>
+            <name>Josua Carl</name>
+            <url>https://imagej.net/User:Rueden</url>
+            <roles>
+                <role>maintainer</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/JosuaCarl/Image-Z-Stack-and-Video-analysis-with-Fiji</connection>
+        <developerConnection>scm:git:git@github.com:JosuaCarl/Image-Z-Stack-and-Video-analysis-with-Fiji</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/JosuaCarl/Image-Z-Stack-and-Video-analysis-with-Fiji</url>
+    </scm>
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/JosuaCarl/Image-Z-Stack-and-Video-analysis-with-Fiji/issues</url>
+    </issueManagement>
+    <ciManagement>
+        <system>GitHub Actions</system>
+        <url>https://github.com/JosuaCarl/Image-Z-Stack-and-Video-analysis-with-Fiji/actions</url>
+    </ciManagement>
+
+    <repositories>
+        <repository>
+            <id>scijava.public</id>
+            <url>https://maven.scijava.org/content/groups/public</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <!-- ImageJ dependencies -->
+        <dependency>
+            <groupId>net.imagej</groupId>
+            <artifactId>ij</artifactId>
+        </dependency>
+    </dependencies>
+</project>

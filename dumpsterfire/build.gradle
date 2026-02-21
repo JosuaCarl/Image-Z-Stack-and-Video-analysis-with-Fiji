@@ -17,8 +17,7 @@ idea {
 
 repositories {
     mavenCentral()
-    maven { url = 'https://jitpack.io' }
-    maven { url = 'https://mvnrepository.com/repos/scijava-public'}
+    maven { url 'https://maven.scijava.org/content/groups/public'}
 }
 
 configurations {}

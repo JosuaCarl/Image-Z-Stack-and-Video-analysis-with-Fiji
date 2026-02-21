@@ -1,5 +1,3 @@
-package ijAnalysis.microscopy;
-
 import ij.*;
 import ij.gui.GenericDialog;
 import ij.gui.Roi;
@@ -17,18 +15,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
-
-public class Analyzer implements PlugIn {
-    Path inputDirectory;
-    Path outputDirectory;
-    String fileSuffix;
-
+public class Wagner_Analyzer implements PlugIn {
     public void run(String arg) {
-        inputDirectory = Path.of( IJ.getDirectory("Choose input directory") ).normalize().toAbsolutePath();
-        outputDirectory = Path.of( IJ.getDirectory("Choose output directory") ).normalize().toAbsolutePath();
-        fileSuffix = IJ.getString("File suffix", ".nd2");
+        Path inputDirectory = Path.of( IJ.getDirectory("Choose input directory") ).normalize().toAbsolutePath();
+        Path outputDirectory = Path.of( IJ.getDirectory("Choose output directory") ).normalize().toAbsolutePath();
+        String fileSuffix = IJ.getString("File suffix", ".nd2");
 
-        processFolder(inputDirectory, outputDirectory);
+        processFolder(inputDirectory, outputDirectory, fileSuffix);
     }
 
     /**
@@ -37,7 +30,7 @@ public class Analyzer implements PlugIn {
      * @param inFolder Input folder
      * @param outFolder Output folder
      */
-    public void processFolder(Path inFolder, Path outFolder) {
+    public void processFolder(Path inFolder, Path outFolder, String fileSuffix) {
         // function to scan folders/subfolders/files to find files with correct suffix
         try (Stream<Path> entries = Files.list(inFolder)) {
             for(Path entry : entries.toList()) {
@@ -55,7 +48,7 @@ public class Analyzer implements PlugIn {
                         }
                     }
 
-                    processFolder(entry, newOutFolder);
+                    processFolder(entry, newOutFolder, fileSuffix);
                 }
 
                 if( entry.getFileName().toString().endsWith(fileSuffix) ) {
