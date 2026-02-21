@@ -30,7 +30,7 @@ jobs:
           distribution: 'temurin'
           cache: maven
       - name: Build with Maven
-        run: mvn --batch-mode --update-snapshots verify
+        run: mvn -B package --no-transfer-progress
       - run: mkdir staging && cp target/*[!-sources].jar staging
       - uses: actions/upload-artifact@v4
         with:
@@ -40,12 +40,10 @@ jobs:
       - name: Create GitHub Release
         uses: actions/create-release@v1
         with:
-          files: target/*[!-sources].jar
           tag_name: v${{ steps.get_version.outputs.version }}
           name: Release v${{ steps.get_version.outputs.version }}
           body: |
             Release version ${{ steps.get_version.outputs.version }}
-          draft: false
-          prerelease: false
+          files: target/*[!-sources].jar
         env:
           GITHUB_TOKEN: ${{ github.token }}
