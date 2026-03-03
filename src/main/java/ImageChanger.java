@@ -9,6 +9,7 @@ import java.nio.file.Path;
 public class ImageChanger {
     public static void setCurrentImage(ImagePlus image) {
         Logger.log("Setting current image to: " + image.getTitle());
+        WindowManager.setTempCurrentImage(image);
         WindowManager.setCurrentWindow(image.getWindow());
     }
 
@@ -41,9 +42,7 @@ public class ImageChanger {
         setCurrentImage(image);
         Logger.log("Adding scale bar...");
 
-        ScaleBar scaleBar = new ScaleBar();
-        Macro.setOptions("width=10 height=5 thickness=5 font=0 hide overlay");
-        scaleBar.run("");
+        IJ.run(image, "Scale Bar...", "width=10 height=10 thickness=5 bold overlay");
         Macro.setOptions(null);
 
         return IJ.getImage();
