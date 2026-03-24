@@ -1,5 +1,6 @@
 import ij.*;
 import ij.gui.GenericDialog;
+import ij.gui.Roi;
 import ij.plugin.*;
 
 import net.imagej.ImageJ;
@@ -8,6 +9,22 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Stepwise_Analyzer implements PlugIn, ImageAnalyzer {
+
+    final Roi defaultRoi;
+
+    public Stepwise_Analyzer() {
+        GenericDialog dialog = new GenericDialog("Specify default ROI");
+        dialog.addNumericField("X:", 0, 0);
+        dialog.addNumericField("Y:", 0, 0);
+        dialog.addNumericField("Width:", 500, 0);
+        dialog.addNumericField("Height:", 500, 0);
+        dialog.showDialog();
+
+        this.defaultRoi = new Roi(
+                (int) dialog.getNextNumber(),(int) dialog.getNextNumber(),
+                (int) dialog.getNextNumber(), (int) dialog.getNextNumber()
+        );
+    }
 
     public void processImage(ImagePlus image, Path outFolder) {
         int[] dimensions = image.getDimensions();
@@ -103,7 +120,7 @@ public class Stepwise_Analyzer implements PlugIn, ImageAnalyzer {
 
         if (projectionType.equals("Select Z-level")) {
             image = ImageChanger.adjustBrightnessContrast(image);
-            image = ImageChanger.crop(image);
+            image = ImageChanger.crop(image, defaultRoi);
             image = ImageChanger.makeSubstack(image);
             image = ImageChanger.addScaleBar(image);
 
@@ -156,7 +173,7 @@ public class Stepwise_Analyzer implements PlugIn, ImageAnalyzer {
         Logger.log("Starting common analysis steps...");
 
         image = ImageChanger.adjustBrightnessContrast(image);
-        image = ImageChanger.crop(image);
+        image = ImageChanger.crop(image, defaultRoi);
         image = ImageChanger.addScaleBar(image);
         return ImageChanger.separateRGB(image);
     }

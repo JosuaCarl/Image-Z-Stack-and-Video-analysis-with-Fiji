@@ -37,6 +37,11 @@ public class SpecifyROI_Interactively implements PlugIn, DialogListener, RoiList
             Roi newRoi = new Roi(x, y, width, height);
             image.setRoi(newRoi);
         } else {
+            Rectangle bounds = previousRoi.getBounds();
+            width = bounds.width;
+            height = bounds.height;
+            x = bounds.x;
+            y = bounds.y;
             oval = previousRoi.getType() == Roi.OVAL;
             squared = previousRoi.getBounds().x == previousRoi.getBounds().y;
         }

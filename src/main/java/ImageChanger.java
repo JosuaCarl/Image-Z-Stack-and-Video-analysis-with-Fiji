@@ -1,4 +1,5 @@
 import ij.*;
+import ij.gui.Roi;
 import ij.plugin.*;
 import ij.plugin.filter.AVI_Writer;
 import ij.plugin.frame.ContrastAdjuster;
@@ -25,10 +26,11 @@ public class ImageChanger {
         return IJ.getImage();
     }
 
-    public static ImagePlus crop(ImagePlus image) {
+    public static ImagePlus crop(ImagePlus image, Roi defaultRoi) {
         setCurrentImage(image);
         Logger.log("Cropping image...");
 
+        if (defaultRoi != null) { image.setRoi(defaultRoi);}
         SpecifyROI_Interactively specifyRoiInteractively = new SpecifyROI_Interactively();
         specifyRoiInteractively.runOnImage(image);
 
@@ -50,11 +52,11 @@ public class ImageChanger {
     }
 
     public static ImagePlus toRGB(ImagePlus image) {
-        if (!image.isComposite()) {
-            Logger.log("Converting image to RGB...");
-            RGBStackConverter.convertToRGB(image);
-        }
-        return image;
+        setCurrentImage(image);
+        RGBStackConverter rgbStackConverter = new RGBStackConverter();
+        rgbStackConverter.run("");
+
+        return IJ.getImage();
     }
 
     public static ImagePlus toGrey(ImagePlus image) {
@@ -113,12 +115,24 @@ public class ImageChanger {
 
         ImagePlus[] rgbSplits = new ImagePlus[3];
         for (ImagePlus split : splits) {
-            switch (whichColor(split)) {
-                case "red": rgbSplits[0] = split;
-                case "green": rgbSplits[1] = split;
-                case "blue": rgbSplits[2] = split;
+            String color = whichColor(split);
+            switch (color) {
+                case "red":
+                    rgbSplits[0] = split;
+                    break;
+                case "green":
+                    rgbSplits[1] = split;
+                    break;
+                case "blue":
+                    rgbSplits[2] = split;
+                    break;
+                default:
+                    Logger.log("Could not determine color for split: " + split.getTitle());
+                    break;
             }
         }
+
+        Logger.log("Found red: " + rgbSplits[0].getTitle() + " green: " + rgbSplits[1].getTitle() + " blue: " + rgbSplits[2].getTitle());
 
         for (ImagePlus rgbSplit : rgbSplits){
             Logger.log("Showing split:" + rgbSplit.getTitle());
@@ -132,11 +146,12 @@ public class ImageChanger {
         Logger.log("Merging RGB Stack...");
         RGBStackMerge rgbStackMerge = new RGBStackMerge();
         ImagePlus composite = rgbStackMerge.mergeHyperstacks(rgb, true);
+        composite.setOverlay(rgb[0].getOverlay());
 
         Logger.log("Showing composite: " + composite.getTitle());
         composite.show();
 
-        return addScaleBar(composite);
+        return composite;
     }
 
     public static ImagePlus makeSubstack(ImagePlus image) {
