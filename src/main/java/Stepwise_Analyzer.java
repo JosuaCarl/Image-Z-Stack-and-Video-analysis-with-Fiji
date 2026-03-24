@@ -10,21 +10,8 @@ import java.nio.file.Paths;
 
 public class Stepwise_Analyzer implements PlugIn, ImageAnalyzer {
 
-    final Roi defaultRoi;
-
-    public Stepwise_Analyzer() {
-        GenericDialog dialog = new GenericDialog("Specify default ROI");
-        dialog.addNumericField("X:", 0, 0);
-        dialog.addNumericField("Y:", 0, 0);
-        dialog.addNumericField("Width:", 500, 0);
-        dialog.addNumericField("Height:", 500, 0);
-        dialog.showDialog();
-
-        this.defaultRoi = new Roi(
-                (int) dialog.getNextNumber(),(int) dialog.getNextNumber(),
-                (int) dialog.getNextNumber(), (int) dialog.getNextNumber()
-        );
-    }
+    Roi defaultRoi;
+    String analysisType;
 
     public void processImage(ImagePlus image, Path outFolder) {
         int[] dimensions = image.getDimensions();
@@ -35,15 +22,15 @@ public class Stepwise_Analyzer implements PlugIn, ImageAnalyzer {
 
         if (frames == 1 && slices == 1) {
             Logger.log("Detected image");
-            imageAnalysis(image, outFolder, true);
+            analysisType = imageAnalysis(image, outFolder, true);
         }
         else if (slices == 1){
             Logger.log("Detected video");
-            videoAnalysis(image, outFolder);
+            analysisType = videoAnalysis(image, outFolder);
         }
         else {
             Logger.log("Detected z-stack");
-            zStackAnalysis(image, outFolder);
+            analysisType = zStackAnalysis(image, outFolder);
         }
 
         String[] imageTitles = WindowManager.getImageTitles();
@@ -58,13 +45,13 @@ public class Stepwise_Analyzer implements PlugIn, ImageAnalyzer {
     Analysis steps
      */
 
-    public void imageAnalysis(ImagePlus image, Path outFolder, boolean withCommon) {
+    public String imageAnalysis(ImagePlus image, Path outFolder, boolean withCommon) {
         Logger.log("Starting single image analysis...");
 
         ImagePlus[] rgbs = withCommon ?  commonAnalysisSteps(image) : ImageChanger.separateRGB(image);
 
         // Save merge
-        ImagePlus composite = ImageChanger.mergeRGB(rgbs);
+        ImagePlus composite = ImageChanger.mergeRGB(rgbs, image.getTitle());
         ImageChanger.save_tif(composite, outFolder, "Merge");
 
         // Save single files
@@ -77,10 +64,11 @@ public class Stepwise_Analyzer implements PlugIn, ImageAnalyzer {
             ImagePlus greyImage = ImageChanger.toGrey(rgbImage);
             ImageChanger.save_tif(greyImage, outFolder, colorNamesImage[i] + "_gray");
         }
+
+        return "image";
     }
 
-
-    public void videoAnalysis(ImagePlus image, Path outFolder) {
+    public String videoAnalysis(ImagePlus image, Path outFolder) {
         Logger.log("Starting video analysis...");
 
         // function for video analysis
@@ -96,7 +84,7 @@ public class Stepwise_Analyzer implements PlugIn, ImageAnalyzer {
         frameDialog.dispose();
 
         // Save merge
-        ImagePlus composite = ImageChanger.mergeRGB(rgbs);
+        ImagePlus composite = ImageChanger.mergeRGB(rgbs, image.getTitle());
         ImageChanger.save_avi(composite, outFolder, "Merge", fps);
 
         // Save single files
@@ -104,20 +92,27 @@ public class Stepwise_Analyzer implements PlugIn, ImageAnalyzer {
         for (int i = 0; i < rgbs.length; i++) {
             ImageChanger.save_avi(rgbs[i], outFolder, colorNamesVideo[i], fps);
         }
+
+        return "video";
     }
 
-
-    public void zStackAnalysis(ImagePlus image, Path outFolder) {
+    public String zStackAnalysis(ImagePlus image, Path outFolder) {
         Logger.log("Starting z-stack analysis...");
 
         String[] projectionTypes = {"Z Project", "3D Project", "Select Z-level"};
-        GenericDialog stackDialog = new GenericDialog("How should the stack be projected ?");
-        stackDialog.addChoice("Projection Type:", projectionTypes, "Z Project");
-        stackDialog.showDialog();
-        String projectionType = stackDialog.getNextChoice();
-        stackDialog.dispose();
-        Logger.log("Selected projection type: " + projectionType);
 
+        boolean saveType = true;
+        String projectionType = analysisType;
+        if(projectionType == null) {
+            GenericDialog stackDialog = new GenericDialog("How should the stack be projected ?");
+            stackDialog.addChoice("Projection Type:", projectionTypes, "Z Project");
+            stackDialog.addCheckbox("Save choice?", true);
+            stackDialog.showDialog();
+            projectionType = stackDialog.getNextChoice();
+            saveType = stackDialog.getNextBoolean();
+            stackDialog.dispose();
+            Logger.log("Selected projection type: " + projectionType);
+        }
         if (projectionType.equals("Select Z-level")) {
             image = ImageChanger.adjustBrightnessContrast(image);
             image = ImageChanger.crop(image, defaultRoi);
@@ -143,7 +138,7 @@ public class Stepwise_Analyzer implements PlugIn, ImageAnalyzer {
             }
 
             // Save merge & individual colors
-            ImagePlus composite = ImageChanger.mergeRGB(rgbs);
+            ImagePlus composite = ImageChanger.mergeRGB(rgbs, image.getTitle());
             String[] colorNames = {"TMR", "GFP", "Hoechst", "Ph2"};
             if (projectionType.equals("Z Project")) {
                 ImageChanger.save_tif(composite, outFolder, "Merge");
@@ -167,6 +162,13 @@ public class Stepwise_Analyzer implements PlugIn, ImageAnalyzer {
                 ImageChanger.save_avi(composite, outFolder, "Merge", fps);
             }
         }
+
+        if (saveType) {
+            return projectionType;
+        }
+        else {
+            return null;
+        }
     }
 
     public ImagePlus[] commonAnalysisSteps(ImagePlus image) {
@@ -189,6 +191,20 @@ public class Stepwise_Analyzer implements PlugIn, ImageAnalyzer {
         (new Stepwise_Analyzer()).run("");
     }
 
+    private void defineDefaultRoi() {
+        GenericDialog dialog = new GenericDialog("Specify default ROI");
+        dialog.addNumericField("X:", 0, 0);
+        dialog.addNumericField("Y:", 0, 0);
+        dialog.addNumericField("Width:", 500, 0);
+        dialog.addNumericField("Height:", 500, 0);
+        dialog.showDialog();
+
+        this.defaultRoi = new Roi(
+                (int) dialog.getNextNumber(),(int) dialog.getNextNumber(),
+                (int) dialog.getNextNumber(), (int) dialog.getNextNumber()
+        );
+    }
+
     public void run(String arg){
         Logger.log("Starting run.");
         Path inputDirectory = Paths.get( IJ.getDirectory("Choose input directory") ).normalize().toAbsolutePath();
@@ -196,6 +212,8 @@ public class Stepwise_Analyzer implements PlugIn, ImageAnalyzer {
         String fileSuffix = IJ.getString("File suffix", ".nd2");
 
         Stepwise_Analyzer stepwiseAnalyzer = new Stepwise_Analyzer();
+        stepwiseAnalyzer.defineDefaultRoi();
+
         FileNavigator fileNavigator = new FileNavigator(stepwiseAnalyzer);
 
 

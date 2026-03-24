@@ -21,7 +21,7 @@ public class Stepwise_AnalyzerTests {
 
         Stepwise_AnalyzerTests stepwiseAnalyzerTests = new Stepwise_AnalyzerTests();
         stepwiseAnalyzerTests.testSingleFile(
-                Paths.get("src/test/resources/Rat_Hippocampal_Neuron.tif").toAbsolutePath(),
+                Paths.get("src/test/resources/8451_R3_001.nd2").toAbsolutePath(),
                 "Default"
         );
 

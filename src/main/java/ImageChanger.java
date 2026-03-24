@@ -142,11 +142,12 @@ public class ImageChanger {
         return rgbSplits;
     }
 
-    public static ImagePlus mergeRGB(ImagePlus[] rgb) {
+    public static ImagePlus mergeRGB(ImagePlus[] rgb, String title) {
         Logger.log("Merging RGB Stack...");
         RGBStackMerge rgbStackMerge = new RGBStackMerge();
         ImagePlus composite = rgbStackMerge.mergeHyperstacks(rgb, true);
         composite.setOverlay(rgb[0].getOverlay());
+        composite.setTitle(title + "_composite");
 
         Logger.log("Showing composite: " + composite.getTitle());
         composite.show();
